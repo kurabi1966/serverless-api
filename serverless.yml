@@ -1,5 +1,5 @@
 service: notes-api
-frameworkVersion: "3"
+frameworkVersion: '3'
 
 provider:
   name: aws
@@ -8,6 +8,9 @@ provider:
   region: eu-central-1
 
 functions:
+  # Authorizer function
+  authorizer:
+    handler: authorizer.handler
   # -------------- Create a note ----------------
   createNote:
     handler: handler.createNote
@@ -22,6 +25,7 @@ functions:
       - http:
           method: post
           path: notes
+          authorizer: authorizer
   # -------------- Update a note ----------------
   updateNote:
     handler: handler.updateNote
@@ -36,6 +40,7 @@ functions:
       - http:
           method: put
           path: notes/{id}
+          authorizer: authorizer
   # -------------- Get a note ----------------
   getNote:
     handler: handler.getNote
@@ -50,6 +55,7 @@ functions:
       - http:
           method: get
           path: notes/{id}
+          authorizer: authorizer
   # -------------- Get all notes ----------------
   getAllNotes:
     handler: handler.getAllNotes
@@ -64,6 +70,7 @@ functions:
       - http:
           method: get
           path: notes
+          authorizer: authorizer
   # -------------- Delete a note ----------------
   deleteNote:
     handler: handler.deleteNote
@@ -78,6 +85,7 @@ functions:
       - http:
           method: delete
           path: notes/{id}
+          authorizer: authorizer
 
 # -------------- Serverless Plugins ----------------
 plugins:
