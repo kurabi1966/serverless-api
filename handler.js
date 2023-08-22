@@ -18,10 +18,7 @@ module.exports.createNote = async (event, context, callback) => {
       ConditionExpression: "attribute_not_exists(notesId)",
     };
     await documentClient.put(params).promise();
-    callback(null, {
-      statusCode: 201,
-      body: JSON.stringify(params.Item),
-    });
+    callback(null, send(201, params.Item));
   } catch (error) {
     callback(null, send(500, error.message));
   }
@@ -48,33 +45,30 @@ module.exports.updateNote = async (event, context, callback) => {
       ConditionExpression: "attribute_exists(notesId)",
     };
     await documentClient.update(params).promise();
-    callback(null, {
-      statusCode: 200,
-      body: JSON.stringify(params),
-    });
+    callback(
+      null,
+      send(200, `Note with id ${id} has been updated successfully`)
+    );
   } catch (error) {
     callback(null, send(500, error.message));
   }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(`Note with id ${id} has been updated`),
-  };
 };
 
 module.exports.getNote = async (event) => {
   const { id } = event.pathParameters;
-  return {
-    statusCode: 200,
-    body: JSON.stringify(`Note with id ${id}`),
-  };
-};
-
-module.exports.getAllNotes = async (event) => {
-  return {
-    statusCode: 200,
-    body: JSON.stringify([`Note 1`, `Note 2`]),
-  };
+  try {
+    const params = {
+      TableName: NOTES_TABLE_NAME,
+      Key: {
+        notesId: id,
+      },
+      ConditionExpression: "attribute_exists(notesId)",
+    };
+    const note = await documentClient.get(params).promise();
+    callback(null, send(200, note));
+  } catch (error) {
+    callback(null, send(500, error.message));
+  }
 };
 
 module.exports.deleteNote = async (event, context, callback) => {
@@ -88,15 +82,34 @@ module.exports.deleteNote = async (event, context, callback) => {
       ConditionExpression: "attribute_exists(notesId)",
     };
     await documentClient.delete(params).promise();
-    return {
-      statusCode: 200,
-      body: JSON.stringify(`Note with id ${id} has been deleted successfully`),
-    };
+    callback(
+      null,
+      send(200, `Note with id ${id} has been deleted successfully`)
+    );
   } catch (error) {
     callback(null, send(500, error.message));
   }
   return {
     statusCode: 200,
     body: JSON.stringify(`Note with id$ {id} has been deleted`),
+  };
+};
+
+module.exports.getAllNotes = async (event) => {
+  try {
+    const params = {
+      TableName: NOTES_TABLE_NAME,
+    };
+    const notes = await documentClient.scan(params).promise();
+    callback(null, send(200, notes));
+  } catch (error) {
+    callback(null, send(500, error.message));
+  }
+};
+
+const send = (status, data) => {
+  return {
+    status,
+    body: JSON.stringify(data),
   };
 };

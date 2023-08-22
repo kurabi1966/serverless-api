@@ -41,6 +41,11 @@ functions:
     handler: handler.getNote
     environment:
       NOTES_TABLE_NAME: !Ref notesTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+        Resource: !GetAtt notesTable.Arn
     events:
       - http:
           method: get
@@ -50,6 +55,11 @@ functions:
     handler: handler.getAllNotes
     environment:
       NOTES_TABLE_NAME: !Ref notesTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+        Resource: !GetAtt notesTable.Arn
     events:
       - http:
           method: get
