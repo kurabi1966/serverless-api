@@ -107,7 +107,11 @@ module.exports.getAllNotes = async (event, context, callback) => {
       TableName: NOTES_TABLE_NAME,
     };
     const notes = await documentClient.scan(params).promise();
-    callback(null, send(200, notes));
+    return {
+      statusCode: 200,
+      body: JSON.stringify(notes),
+    };
+    // callback(null, send(200, notes));
   } catch (error) {
     console.log('------>', error.message);
     callback(null, send(500, error.message));
