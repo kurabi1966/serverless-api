@@ -3,9 +3,9 @@ const DynamoDB = require('aws-sdk/clients/dynamodb');
 const documentClient = new DynamoDB.DocumentClient({ region: 'eu-central-1' });
 const { uuid } = require('uuidv4');
 const NOTES_TABLE_NAME = process.env.NOTES_TABLE_NAME;
-const send = (status, data) => {
+const send = (statusCode, data) => {
   return {
-    status,
+    statusCode,
     body: JSON.stringify(data),
   };
 };
@@ -107,13 +107,8 @@ module.exports.getAllNotes = async (event, context, callback) => {
       TableName: NOTES_TABLE_NAME,
     };
     const notes = await documentClient.scan(params).promise();
-    return {
-      statusCode: 200,
-      body: JSON.stringify(notes),
-    };
-    // callback(null, send(200, notes));
+    callback(null, send(200, notes));
   } catch (error) {
-    console.log('------>', error.message);
     callback(null, send(500, error.message));
   }
 };
