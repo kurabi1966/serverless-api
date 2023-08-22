@@ -109,6 +109,7 @@ module.exports.getAllNotes = async (event, context, callback) => {
     const notes = await documentClient.scan(params).promise();
     callback(null, send(200, notes));
   } catch (error) {
+    console.log('------>', error.message);
     callback(null, send(500, error.message));
   }
 };
