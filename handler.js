@@ -1,8 +1,14 @@
-"use strict";
-const DynamoDB = require("aws-sdk/clients/dynamodb");
-const documentClient = new DynamoDB.DocumentClient({ region: "eu-central-1" });
-const { uuid } = require("uuidv4");
+'use strict';
+const DynamoDB = require('aws-sdk/clients/dynamodb');
+const documentClient = new DynamoDB.DocumentClient({ region: 'eu-central-1' });
+const { uuid } = require('uuidv4');
 const NOTES_TABLE_NAME = process.env.NOTES_TABLE_NAME;
+const send = (status, data) => {
+  return {
+    status,
+    body: JSON.stringify(data),
+  };
+};
 
 module.exports.createNote = async (event, context, callback) => {
   const { title, content } = JSON.parse(event.body);
@@ -15,7 +21,7 @@ module.exports.createNote = async (event, context, callback) => {
         title,
         content,
       },
-      ConditionExpression: "attribute_not_exists(notesId)",
+      ConditionExpression: 'attribute_not_exists(notesId)',
     };
     await documentClient.put(params).promise();
     callback(null, send(201, params.Item));
@@ -26,8 +32,8 @@ module.exports.createNote = async (event, context, callback) => {
 module.exports.updateNote = async (event, context, callback) => {
   const { id } = event.pathParameters;
   const { title, content } = JSON.parse(event.body);
-  const UpdateExpression = `set ${title ? "#title = :title, " : ""}${
-    title ? "#content = :content" : ""
+  const UpdateExpression = `set ${title ? '#title = :title, ' : ''}${
+    title ? '#content = :content' : ''
   }`;
   try {
     var params = {
@@ -35,14 +41,14 @@ module.exports.updateNote = async (event, context, callback) => {
       Key: { notesId: id },
       UpdateExpression,
       ExpressionAttributeNames: {
-        "#title": "title",
-        "#content": "content",
+        '#title': 'title',
+        '#content': 'content',
       },
       ExpressionAttributeValues: {
-        ":title": title,
-        ":content": content,
+        ':title': title,
+        ':content': content,
       },
-      ConditionExpression: "attribute_exists(notesId)",
+      ConditionExpression: 'attribute_exists(notesId)',
     };
     await documentClient.update(params).promise();
     callback(
@@ -62,7 +68,7 @@ module.exports.getNote = async (event) => {
       Key: {
         notesId: id,
       },
-      ConditionExpression: "attribute_exists(notesId)",
+      ConditionExpression: 'attribute_exists(notesId)',
     };
     const note = await documentClient.get(params).promise();
     callback(null, send(200, note));
@@ -79,7 +85,7 @@ module.exports.deleteNote = async (event, context, callback) => {
       Key: {
         notesId: id,
       },
-      ConditionExpression: "attribute_exists(notesId)",
+      ConditionExpression: 'attribute_exists(notesId)',
     };
     await documentClient.delete(params).promise();
     callback(
@@ -105,11 +111,4 @@ module.exports.getAllNotes = async (event) => {
   } catch (error) {
     callback(null, send(500, error.message));
   }
-};
-
-const send = (status, data) => {
-  return {
-    status,
-    body: JSON.stringify(data),
-  };
 };
