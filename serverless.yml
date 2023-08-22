@@ -8,6 +8,7 @@ provider:
   region: eu-central-1
 
 functions:
+  # -------------- Create a note ----------------
   createNote:
     handler: handler.createNote
     environment:
@@ -21,7 +22,7 @@ functions:
       - http:
           method: post
           path: notes
-
+  # -------------- Update a note ----------------
   updateNote:
     handler: handler.updateNote
     environment:
@@ -35,6 +36,7 @@ functions:
       - http:
           method: put
           path: notes/{id}
+  # -------------- Get a note ----------------
   getNote:
     handler: handler.getNote
     environment:
@@ -43,7 +45,7 @@ functions:
       - http:
           method: get
           path: notes/{id}
-
+  # -------------- Get all notes ----------------
   getAllNotes:
     handler: handler.getAllNotes
     environment:
@@ -52,9 +54,14 @@ functions:
       - http:
           method: get
           path: notes
-
+  # -------------- Delete a note ----------------
   deleteNote:
     handler: handler.deleteNote
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamoDb:DeleteItem
+        Resource: !GetAtt notesTable.Arn
     environment:
       NOTES_TABLE_NAME: !Ref notesTable
     events:
@@ -62,9 +69,11 @@ functions:
           method: delete
           path: notes/{id}
 
+# -------------- Serverless Plugins ----------------
 plugins:
   - serverless-iam-roles-per-function
 
+# -------------- Resources ----------------
 resources:
   Resources:
     notesTable:

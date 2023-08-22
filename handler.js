@@ -23,10 +23,7 @@ module.exports.createNote = async (event, context, callback) => {
       body: JSON.stringify(params.Item),
     });
   } catch (error) {
-    callback(null, {
-      statusCode: 500,
-      body: JSON.stringify(error.message),
-    });
+    callback(null, send(500, error.message));
   }
 };
 module.exports.updateNote = async (event, context, callback) => {
@@ -56,10 +53,7 @@ module.exports.updateNote = async (event, context, callback) => {
       body: JSON.stringify(params),
     });
   } catch (error) {
-    callback(null, {
-      statusCode: 500,
-      body: JSON.stringify(error.message),
-    });
+    callback(null, send(500, error.message));
   }
 
   return {
@@ -83,8 +77,24 @@ module.exports.getAllNotes = async (event) => {
   };
 };
 
-module.exports.deleteNote = async (event) => {
+module.exports.deleteNote = async (event, context, callback) => {
   const { id } = event.pathParameters;
+  try {
+    const params = {
+      TableName: NOTES_TABLE_NAME,
+      Key: {
+        notesId: id,
+      },
+      ConditionExpression: "attribute_exists(notesId)",
+    };
+    await documentClient.delete(params).promise();
+    return {
+      statusCode: 200,
+      body: JSON.stringify(`Note with id ${id} has been deleted successfully`),
+    };
+  } catch (error) {
+    callback(null, send(500, error.message));
+  }
   return {
     statusCode: 200,
     body: JSON.stringify(`Note with id$ {id} has been deleted`),
