@@ -60,7 +60,7 @@ module.exports.updateNote = async (event, context, callback) => {
   }
 };
 
-module.exports.getNote = async (event) => {
+module.exports.getNote = async (event, context, callback) => {
   const { id } = event.pathParameters;
   try {
     const params = {
@@ -101,7 +101,7 @@ module.exports.deleteNote = async (event, context, callback) => {
   };
 };
 
-module.exports.getAllNotes = async (event) => {
+module.exports.getAllNotes = async (event, context, callback) => {
   try {
     const params = {
       TableName: NOTES_TABLE_NAME,
